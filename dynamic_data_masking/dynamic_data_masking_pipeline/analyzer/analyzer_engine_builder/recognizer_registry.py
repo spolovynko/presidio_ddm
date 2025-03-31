@@ -10,7 +10,9 @@ class RegistryRecognizerBuilder:
     def add_deny_list_patterns(self, deny_list_dict):
         for entity, deny_list in deny_list_dict.items():
             pattern_recognizer = PatternRecognizer(
-                supported_entity=entity, deny_list=deny_list, supported_language=self.language
+                supported_entity=entity, 
+                deny_list=deny_list, 
+                supported_language=self.language
             )
             self.pattern_recognizers.append(pattern_recognizer)
         return self

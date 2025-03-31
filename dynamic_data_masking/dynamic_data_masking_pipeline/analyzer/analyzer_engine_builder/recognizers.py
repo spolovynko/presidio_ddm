@@ -12,7 +12,9 @@ RECOGNIZERS = {
     'fr': {
         'deny_list': {
             "SALUT": ["Bonjour"],
-            "HEROS": ["Capitaine America"]
+            "HEROS": ["Capitaine America"],
+            "HEALTH":['retard mentale','diagnostiqué', 'médecins', 'handicapé'],
+            "SEXUALITY":["tombée amoureuse"]
         },
         'regex_list': {
             "EMAIL": [r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"]

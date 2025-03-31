@@ -1,7 +1,8 @@
 import argparse
 
 from dynamic_data_masking.dynamic_data_masking_pipeline.dynamic_data_masking_pipeline import *
-from dynamic_data_masking.dynamic_data_masking_pipeline.mappers import LANG_MAP, CONF_LEVEL_MAP, ANONYMIZER
+from dynamic_data_masking.dynamic_data_masking_pipeline.mappers import LANG_MAP, CONF_LEVEL_MAP, ANALYZER, ANONYMIZER
+from dynamic_data_masking.customers import CUSTOMERS
 
 def main():
     parser = argparse.ArgumentParser(description="Arguments parser for dynamic data masking engine")
@@ -14,7 +15,7 @@ def main():
     # TEXT ANALYZER STEP ARGUMENTS
     parser.add_argument("--conf_level", type=str, default='c4')
     parser.add_argument("--analyzer_engine", type=str, default='from_config_file', choices=['from_config_file', 'from_code'], help='provides the option on Analyzer Engine builder code / from config file')
-
+    parser.add_argument("--customer", type=str, default='fraude', choices=CUSTOMERS.keys(), help='list of customers')
     # TEXT ANONYMIZER STEP ARGUMETNS
     parser.add_argument("--anonimyzer_operator", type=str, default='yes', help='type of anonimyzer')
 
@@ -32,7 +33,9 @@ def main():
         )
     )
     pipeline.add_step(AnalyzerStep(
+        from_config_file=ANALYZER[args.analyzer_engine],
         language=args.lang,
+        customer=args.customer,
         use_predefined=CONF_LEVEL_MAP[args.conf_level]
         )
     )
@@ -47,6 +50,7 @@ def main():
         output_pdf_path=args.output_file_path
         )
     )
+
     pipeline.execute_pipeline()
 
 if __name__ == "__main__":
