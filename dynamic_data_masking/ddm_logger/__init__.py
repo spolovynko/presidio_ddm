@@ -1,0 +1,1 @@
+from dynamic_data_masking.ddm_logger.ddm_logger import DynamicDataMaskingLogger

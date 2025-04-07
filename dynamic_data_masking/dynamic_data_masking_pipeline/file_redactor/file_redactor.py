@@ -1,6 +1,9 @@
+from dynamic_data_masking.ddm_logger import DynamicDataMaskingLogger
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_redactor.redactor import RedactionStrategyFactory
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_redactor.token_filter.word_data_mapper import WordDataMapper
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_redactor.token_filter.comparison import DefaultComparisonStrategy, WordDifferenceFinder
+
+logger = DynamicDataMaskingLogger().get_logger()
 
 class DynamicDataMaskingFileRedactor:
     def __init__(self, comparison_strategy=None, redaction_strategy="blackout"):
@@ -15,7 +18,7 @@ class DynamicDataMaskingFileRedactor:
         # Step 2: Map words to coordinates
         data_mapper = WordDataMapper(words_info)
         differing_words_data = data_mapper.get_word_coordinates(differing_words)
-
+        logger.info("FILE MASKING : FILE REDACTION STARTED")
         # Step 3: Apply redaction strategy
         self.redaction_strategy.apply_redaction(input_file_path, differing_words_data, output_pdf_path)
         

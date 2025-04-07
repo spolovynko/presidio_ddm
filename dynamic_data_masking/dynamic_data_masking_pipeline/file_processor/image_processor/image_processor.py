@@ -19,7 +19,6 @@ class ImageProcessor(ABC):
 class ImageTextProcessor(ImageProcessor):
     
     def process(self, image, lang, ocr_config):
-        ocr_config = ocr_config
         return pytesseract.image_to_string(image, lang=lang , config=ocr_config)
 
 

@@ -2,10 +2,13 @@ from collections import defaultdict
 
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine_builder.recognizer_registry import RegistryRecognizerBuilder
 from dynamic_data_masking.ddm_connectors.ddm_db_connector import DDMDatabaseReader
+from dynamic_data_masking.ddm_logger import DynamicDataMaskingLogger
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine_builder.nlp_configuration import NLP_CONFIGURATIONS
 from dynamic_data_masking.customers import CUSTOMERS
 from dynamic_data_masking.ddm_config.config_reader import config
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine_builder.recognizers import RECOGNIZERS
+
+logger = DynamicDataMaskingLogger().get_logger()
 
 class PresidioAnalyzerDirector:
     def __init__(self, builder):
@@ -14,20 +17,16 @@ class PresidioAnalyzerDirector:
     def construct(self, from_config_file, language, use_predefined, customer):
         if from_config_file:
             if use_predefined:
-                print('form config file using C3')
+                # print('form config file using C3')
                 config_file = r'dynamic_data_masking\ddm_config\analyzer_config\all-config-C3.yaml'
             else:
-                print('form config file using oly C4')
+                # print('form config file using oly C4')
                 config_file = r'dynamic_data_masking\ddm_config\analyzer_config\all-config-C4.yaml'
 
             self.builder.set_config_file(config_file)
             return self.builder.build_analyzer()
         
         else:
-            if language not in NLP_CONFIGURATIONS:
-                print(f"Warning: Language '{language}' not found, defaulting to English.")
-                language = "en"
-
             configuration = NLP_CONFIGURATIONS[language]
             recognizer_data = RECOGNIZERS.get(language, {'deny_list': {}, 'regex_list': {}})
             
@@ -80,7 +79,11 @@ class PresidioAnalyzerDirector:
                 .add_regex_patterns(recognizer_data['regex_list'])
                 .build()
             )
-
+            if not recognizer_registry:
+                logger.warning(f'TEXT ANALYZER : NO RECOGNIZERS FOUND')
+                # print("NO RECOGNIZERS FOUND")
+                
             self.builder.set_nlp_configuration(configuration)
+
             self.builder.set_recognizer_registry(recognizer_registry)
             return self.builder.build_analyzer()

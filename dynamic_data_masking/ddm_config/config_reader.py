@@ -31,3 +31,4 @@ class ConfigReader:
 
 # Singleton instance for convenient access
 config = ConfigReader()
+

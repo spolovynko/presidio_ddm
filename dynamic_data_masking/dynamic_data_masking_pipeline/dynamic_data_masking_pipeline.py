@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
+import sys
 
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_processor import DynamicDataMaskingFileProcessor
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer import DynamicDataMaskingAnalyzer
 from dynamic_data_masking.dynamic_data_masking_pipeline.anonymizer import DynamicDataMaskingAnonimyzer
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_redactor import DynamicDataMaskingFileRedactor
+from dynamic_data_masking.ddm_logger import DynamicDataMaskingLogger
+
+logger = DynamicDataMaskingLogger().get_logger()
 
 class PipelineStep(ABC):
     
@@ -19,14 +23,19 @@ class FileProcessorStep(PipelineStep):
         self.ocr_config = ocr_config
 
     def execute(self, data=None):
-        print("FILE READER RUNS")
+        logger.info("FILE READER : RUNS")
+
         file_processor = DynamicDataMaskingFileProcessor(
             file_path=self.file_path, 
             language=self.language, 
             resolution=self.resolution,
             ocr_config=self.ocr_config
             )
-        extracted_text, word_coordinates = file_processor.process()
+        try:
+            extracted_text, word_coordinates = file_processor.process()
+            logger.info('FILE READER : TEXT EXTRACTED SUCESSFULLY; TOKENS COORDINATES EXTRACTED SUCCESSFULLY')
+        except:
+            logger.error('FILE READER : FAILURE TO EXTRACT TEXT')
         return {"text": extracted_text, "word_coordinates": word_coordinates}
 
 
@@ -38,14 +47,26 @@ class AnalyzerStep(PipelineStep):
         self.from_config_file = from_config_file
 
     def execute(self, data):
-        print("ANALYZER RUNS")
+        # print("ANALYZER RUNS")
+        logger.info("TEXT ANALYZER : RUNS")
+
         analyzer = DynamicDataMaskingAnalyzer(
             from_config_file = self.from_config_file,
             language = self.language,
             customer = self.customer,
             use_predefined=self.use_predefined
             )
-        result = analyzer.analyze_text(text=data["text"])
+        try:
+            logger.info("TEXT ANALYZER : ANALYZIS RUNS")
+            result = analyzer.analyze_text(text=data["text"])
+            logger.info("TEXT ANALYZER : ANALYZIS COMPLETE")
+            # ----------------------------------------------- TO REFACTOR -----------------------------------------------
+            text = data['text']
+            results = [(res.entity_type, text[res.start:res.end]) for res in result]
+            logger.info(f"TEXT ANALYZER : ANALYZIS RESULTS : {results}")
+        except:
+            logger.error("TEXT ANALYZER : FAILURE TO ANALYZER")
+            sys.exit(1)
         data["analysis_results"] = result
         return data
     
@@ -55,9 +76,12 @@ class AnonymizerStep(PipelineStep):
         self.use_default_operators = use_default_operators
 
     def execute(self, data):
-        print("ANONYMIZER RUNS")
+        # print("ANONYMIZER RUNS")
+        logger.info("TEXT ANONYMISATION : RUNS")
+
         anonymizer = DynamicDataMaskingAnonimyzer()
         masked_text = anonymizer.anonimyze(text=data["text"], analyzer_results=data["analysis_results"], use_default_operators=self.use_default_operators)
+        logger.info("TEXT ANONIMYZATION : ANONYMIZATION COMPLETED")
         data["masked_text"] = masked_text
         return data
     
@@ -68,15 +92,21 @@ class RedactorStep(PipelineStep):
         self.redaction_strategy = redaction_strategy
         
     def execute(self, data):
-        print("REDACTOR RUNS")
+        # print("REDACTOR RUNS")
+        logger.info("FILE MASKING : RUNS")
+
         redactor = DynamicDataMaskingFileRedactor(redaction_strategy=self.redaction_strategy)
-        redactor.redact_file(
-            input_file_path=self.input_file_path,
-            extracted_text=data["text"],
-            masked_text=data["masked_text"],
-            words_info=data["word_coordinates"],
-            output_pdf_path=self.output_pdf_path
-        )
+        try:
+            redactor.redact_file(
+                input_file_path=self.input_file_path,
+                extracted_text=data["text"],
+                masked_text=data["masked_text"],
+                words_info=data["word_coordinates"],
+                output_pdf_path=self.output_pdf_path
+            )
+            logger.info("FILE MASKING : FILE SUCESSFULLY REDACTED")
+        except:
+            logger.error("FILE MASKING : FILE MASKING FAILED")
         return data
 
 class DynamicDataMaskingPipeline:

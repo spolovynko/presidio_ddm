@@ -2,11 +2,17 @@ import os
 import pdfplumber
 from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter, PdfReader
+
+from dynamic_data_masking.ddm_logger import DynamicDataMaskingLogger
 from dynamic_data_masking.dynamic_data_masking_pipeline.file_redactor.redactor.base_redactor import RedactionStrategy
+
+logger = DynamicDataMaskingLogger().get_logger()
 
 class BlackoutRedaction(RedactionStrategy):
     def apply_redaction(self, input_pdf_path, differing_words_data, output_pdf_path):
         temp_pdf_path = "temp_overlay.pdf"
+        
+        logger.info("FILE MASKING : BLACKOUT MASKING METHOD OPTED")
 
         with pdfplumber.open(input_pdf_path) as pdf:
             overlay = canvas.Canvas(temp_pdf_path)
