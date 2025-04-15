@@ -26,7 +26,6 @@ class PresidioAnalyzerEngineProviderBuilder(PresidioAnalyzer):
     def build_analyzer(self):
         if not self.presidio_config_file:
             logger.error('TEXT ANALYZER : NLP ENGINE FAILED TO CONGURE')
-            # raise ValueError('NLP Engine not configured. Call set_config_file() first.')
             sys.exit(1)
         provider = AnalyzerEngineProvider(
             analyzer_engine_conf_file=self.presidio_config_file

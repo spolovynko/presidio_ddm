@@ -4,7 +4,7 @@ from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine
 from dynamic_data_masking.ddm_connectors.ddm_db_connector import DDMDatabaseReader
 from dynamic_data_masking.ddm_logger import DynamicDataMaskingLogger
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine_builder.nlp_configuration import NLP_CONFIGURATIONS
-from dynamic_data_masking.customers import CUSTOMERS
+from dynamic_data_masking.dynamic_data_masking_customer_pipelines.customers import CUSTOMERS
 from dynamic_data_masking.ddm_config.config_reader import config
 from dynamic_data_masking.dynamic_data_masking_pipeline.analyzer.analyzer_engine_builder.recognizers import RECOGNIZERS
 
@@ -45,7 +45,7 @@ class PresidioAnalyzerDirector:
                 db=database
             )
 
-            db_connection.connect_to_server()
+            # db_connection.connect_to_server()
 
             for category in customer_data['c4_deny_list_categories']:
                 query = db_connection.select_deny_list_query(
@@ -66,10 +66,11 @@ class PresidioAnalyzerDirector:
                     values_table='ddm_regex_list',
                     col_name='regex'
                 )
+            
                 result = db_connection.execute_query(query=query)
                 tokens = [token[0] for token in result]
                 recognizer_data["regex_list"][category] = tokens
-
+            # print(recognizer_data)
             recognizer_data = dict(recognizer_data)
             # ----------------------------------- DATABASE INTEGRATION MVP 1 ---- TO REFACTOR -----------------------------------
             recognizer_builder = RegistryRecognizerBuilder(language=language, use_predefined=use_predefined)

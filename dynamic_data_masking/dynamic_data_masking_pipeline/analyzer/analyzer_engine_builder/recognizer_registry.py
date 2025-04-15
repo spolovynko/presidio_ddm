@@ -59,7 +59,6 @@ class RegistryRecognizerBuilder:
             self.pattern_recognizers.append(pattern_recognizer)
             # -------------------------------- TO REFACTOR --------------------------------
         if not self.pattern_recognizers:
-            # print("REGEX LIST EMPTY")
             logger.warning("TEXT ANALYZER : REGEX LIST IS EMPTY")
             # -------------------------------- TO REFACTOR --------------------------------
         return self
@@ -69,7 +68,6 @@ class RegistryRecognizerBuilder:
             self.recognizer_registry.load_predefined_recognizers()
         if not self.pattern_recognizers:
             logger.error("TEXT ANALYZER : NO RECOGNIZERS FOUND")
-            # print('NO RECOGNIZERS FOUND')
             sys.exit()
         for recognizer in self.pattern_recognizers:
             self.recognizer_registry.add_recognizer(recognizer)

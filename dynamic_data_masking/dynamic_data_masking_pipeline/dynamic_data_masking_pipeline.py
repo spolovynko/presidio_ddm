@@ -36,7 +36,7 @@ class FileProcessorStep(PipelineStep):
             logger.info('FILE READER : TEXT EXTRACTED SUCESSFULLY; TOKENS COORDINATES EXTRACTED SUCCESSFULLY')
         except:
             logger.error('FILE READER : FAILURE TO EXTRACT TEXT')
-        return {"text": extracted_text, "word_coordinates": word_coordinates}
+        return {"text": extracted_text, "word_coordinates": word_coordinates, "status":200}
 
 
 class AnalyzerStep(PipelineStep):
@@ -64,10 +64,10 @@ class AnalyzerStep(PipelineStep):
             text = data['text']
             results = [(res.entity_type, text[res.start:res.end]) for res in result]
             logger.info(f"TEXT ANALYZER : ANALYZIS RESULTS : {results}")
-        except:
-            logger.error("TEXT ANALYZER : FAILURE TO ANALYZER")
-            sys.exit(1)
+        except ValueError:
+            logger.error("TEXT ANALYZER : FAILURE TO ANALYZE")
         data["analysis_results"] = result
+        data['status'] = 404
         return data
     
 class AnonymizerStep(PipelineStep):
@@ -80,7 +80,11 @@ class AnonymizerStep(PipelineStep):
         logger.info("TEXT ANONYMISATION : RUNS")
 
         anonymizer = DynamicDataMaskingAnonimyzer()
-        masked_text = anonymizer.anonimyze(text=data["text"], analyzer_results=data["analysis_results"], use_default_operators=self.use_default_operators)
+        masked_text = anonymizer.anonimyze(
+            text=data["text"], 
+            analyzer_results=data["analysis_results"], 
+            use_default_operators=self.use_default_operators
+            )
         logger.info("TEXT ANONIMYZATION : ANONYMIZATION COMPLETED")
         data["masked_text"] = masked_text
         return data
@@ -107,6 +111,7 @@ class RedactorStep(PipelineStep):
             logger.info("FILE MASKING : FILE SUCESSFULLY REDACTED")
         except:
             logger.error("FILE MASKING : FILE MASKING FAILED")
+            data['status'] = 404
         return data
 
 class DynamicDataMaskingPipeline:

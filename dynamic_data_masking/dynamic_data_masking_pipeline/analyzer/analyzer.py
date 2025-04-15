@@ -31,4 +31,5 @@ class DynamicDataMaskingAnalyzer:
         logger.info(f"TEXT ANALYZER : ANALYZER ENGINE READY")
         logger.info(f"TEXT ANALYZER : PARAMS : Analyzer configuration from config file : {self.from_config_file}; Language : {self.language}; Customer : {self.customer}; Use of predefined recognizers : {self.use_predefined}")
     def analyze_text(self, text):
+
         return self.analyzer.analyze(text=text, language=self.language)

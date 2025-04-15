@@ -37,13 +37,11 @@ class DynamicDataMaskingFileProcessor:
         if not path.is_file():
             # print(f"❌ File not found: '{value}'")
             logger.error(f"FILE READER : {value} file not found")
-            sys.exit(1)
 
         ext = path.suffix.lower()
         if ext not in self.supported_types:
             # print(f"❌ Unsupported file type: '{ext}'. Supported types: {', '.join(self.supported_types.keys())}")
             logger.error(f"FILE READER : File extension {ext} not supported")
-            sys.exit(1)
         
         self._file_path = path
 
